@@ -1,0 +1,36 @@
+FROM daocloud.io/ubuntu:14.04
+MAINTAINER Jason Lin <jason.lin03@gmail.com>
+WORKDIR /root
+RUN sudo echo "deb http://mirrors.aliyun.com/ubuntu/ trusty main restricted universe multiverse" > /etc/apt/sources.list && \
+        echo "deb http://mirrors.aliyun.com/ubuntu/ trusty-security main restricted universe multiverse" >> /etc/apt/sources.list && \
+        echo "deb http://mirrors.aliyun.com/ubuntu/ trusty-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
+        echo "deb http://mirrors.aliyun.com/ubuntu/ trusty-proposed main restricted universe multiverse" >> /etc/apt/sources.list && \
+        echo "deb http://mirrors.aliyun.com/ubuntu/ trusty-backports main restricted universe multiverse" >> /etc/apt/sources.list && \
+        echo "deb-src http://mirrors.aliyun.com/ubuntu/ trusty main restricted universe multiverse" >> /etc/apt/sources.list && \
+        echo "deb-src http://mirrors.aliyun.com/ubuntu/ trusty-security main restricted universe multiverse" >> /etc/apt/sources.list && \
+        echo "deb-src http://mirrors.aliyun.com/ubuntu/ trusty-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
+        echo "deb-src http://mirrors.aliyun.com/ubuntu/ trusty-proposed main restricted universe multiverse" >> /etc/apt/sources.list && \
+        echo "deb-src http://mirrors.aliyun.com/ubuntu/ trusty-backports main restricted universe multiverse" >> /etc/apt/sources.list && \
+        apt-get update  && \
+        apt-get -y install wget libwebkit2gtk-3.0-25 libappindicator3-1
+RUN if [ ! -f "~/lantern-installer-64-bit.deb" ] ; then  wget https://raw.githubusercontent.com/getlantern/lantern-binaries/master/lantern-installer-64-bit.deb ; fi
+RUN sudo dpkg -i lantern-installer-64-bit.deb && \
+        rm -rf lantern-installer-64-bit.deb && \
+        apt-get -f install && \
+        apt-get clean && \
+        rm -rf /var/cache/apt/* /var/lib/apt/lists/* && \
+        mkdir /root/.lantern && \
+	echo 'addr: "0.0.0.0:3128"' > /root/.lantern/settings.yaml && \
+	echo 'autoLaunch: false' >> /root/.lantern/settings.yaml  \
+	echo 'autoReport: true' >> /root/.lantern/settings.yaml  \
+	echo 'lang: "zh-CN"' >> /root/.lantern/settings.yaml  \
+	echo 'localHTTPToken: lantern' >> /root/.lantern/settings.yaml  \
+	echo 'pacURL: ""' >> /root/.lantern/settings.yaml  \
+	echo 'proxyAll: true' >> /root/.lantern/settings.yaml  \
+	echo 'socksAddr: "0.0.0.0:3129"' >> /root/.lantern/settings.yaml  \
+	echo 'systemProxy: false' >> /root/.lantern/settings.yaml  \
+	echo 'uiAddr: 0.0.0.0:8080' >> /root/.lantern/settings.yaml  \
+
+EXPOSE 3128/tcp 3129/tcp 8080/tcp
+
+ENTRYPOINT ["/usr/bin/lantern", "--configdir=/root/.lantern", "--headless=true"]
